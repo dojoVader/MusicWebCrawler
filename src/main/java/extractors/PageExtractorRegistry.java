@@ -23,7 +23,7 @@ public class PageExtractorRegistry {
         if (pageExtractor == null) {
             return new BasicPageExtractor();
         } else {
-            return (IPageExtractor) map.get(key);
+            return pageExtractor;
         }
 
     }
