@@ -3,6 +3,9 @@ import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import extractors.NotJustOkExtractor;
+import extractors.PageExtractorRegistry;
+import extractors.TooExclusiveExtractor;
 
 /**
  * Created by Aderemi.Okeowo on 5/19/2018.
@@ -33,6 +36,8 @@ public class JagudaController {
         crawlController.addSeed("https://notjustok.com/category/download-mp3/");
         crawlController.addSeed("http://tooxclusive.com/artists-z-music-list/");
 
+        PageExtractorRegistry.registerExtractorPerHost("notjustok.com", new NotJustOkExtractor());
+        PageExtractorRegistry.registerExtractorPerHost("tooexclusive.com", new TooExclusiveExtractor());
         crawlController.start(JagudaCrawler.class, numberOfCrawlers);
 
 

@@ -5,11 +5,14 @@
 import com.google.common.io.Files;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
-import edu.uci.ics.crawler4j.parser.BinaryParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
+import extractors.PageExtractorRegistry;
+import interfaces.IPageExtractor;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.regex.Pattern;
 
 /**
@@ -17,7 +20,7 @@ import java.util.regex.Pattern;
  */
 public class JagudaCrawler extends WebCrawler {
 
-    private final static String[] allowedSites = {"https://notjustok.com/","http://tooxclusive.com"};
+    private final static String[] allowedSites = {"https://notjustok.com/", "http://tooxclusive.com"};
     private static String crawledExtensions = ".*(\\.(ogg|mp3|wma|m4a))$";
     private final static Pattern FILTERS = Pattern.compile(crawledExtensions);
 
@@ -37,7 +40,7 @@ public class JagudaCrawler extends WebCrawler {
         //Strategy: Only Allow if it comes from the crawled site
         if (matchesSite(currentHref)) {
             // Strategy: Only allow if it comes from the site and is the not an extension File
-            if(currentHref.endsWith(".htm") || currentHref.endsWith(".html")){
+            if (currentHref.endsWith(".htm") || currentHref.endsWith(".html")) {
                 return true; //
             }
             if (Utils.hasExtension(currentHref)) {
@@ -70,24 +73,30 @@ public class JagudaCrawler extends WebCrawler {
 
         if (FILTERS.matcher(pageUrl).matches()) {
             // We want the mp3 not a parse html Data
-            logger.info("Content type: [" + page.getContentType()+"]");
+            //Let's get the name of the file
+            String[] name = pageUrl.split("/");
+            String lastName = name[name.length - 1];
+            String destinationPath = "/data/mp3/" + lastName;
+            try {
+                Files.write(page.getContentData(), new File(destinationPath));
+                logger.info("File {} has been written to path {}", lastName, destinationPath);
+            } catch (IOException ex) {
 
-//            //Let's get the name of the file
-//            String[] name = pageUrl.split("/");
-//            String lastName = name[name.length-1];
-//            String destinationPath = "/data/mp3/" + lastName;
-//            try{
-//                Files.write(page.getContentData(), new File(destinationPath));
-//                logger.info("File {} has been written to path {}", lastName, destinationPath);
-//            }
-//            catch(IOException ex){
-//
-//                logger.error(ex.getMessage());
-//            }
+                logger.error(ex.getMessage());
+            }
 
 
-
-
+        } else {
+            try {
+                URI Hostname = new URI(pageUrl);
+                String PageHostName = Hostname.getHost();
+                IPageExtractor extractor = PageExtractorRegistry.getExtractor(PageHostName);
+                extractor.handleExtraction(page);
+            } catch (URISyntaxException ex) {
+                logger.error("Failed to start URI, bad syntax {}", pageUrl);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+            }
         }
     }
 }

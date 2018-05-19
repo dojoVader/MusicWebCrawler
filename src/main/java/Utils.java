@@ -15,4 +15,8 @@ public class Utils {
         Pattern pattern = Pattern.compile(".*\\.\\w{2,4}$");
         return pattern.matcher(currentHref).matches();
     }
+
+
+
+
 }
