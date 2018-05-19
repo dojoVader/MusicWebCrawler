@@ -1,5 +1,6 @@
 package extractors;
 
+import edu.uci.ics.crawler4j.crawler.Page;
 import interfaces.IPageExtractor;
 
 /**
@@ -7,7 +8,8 @@ import interfaces.IPageExtractor;
  */
 public class NotJustOkExtractor implements IPageExtractor {
 
-    public void handleExtraction(){
+
+    public void handleExtraction(Page page){
         // handle the Extraction here
     }
 
