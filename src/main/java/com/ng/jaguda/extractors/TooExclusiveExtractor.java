@@ -30,7 +30,7 @@ public class TooExclusiveExtractor implements IPageExtractor {
     private URL url;
 
 
-    @Override
+
     public void handleExtraction(Page page) {
         // Instantiate our Map
 
@@ -43,13 +43,17 @@ public class TooExclusiveExtractor implements IPageExtractor {
 
         while (matcher.find()) {
             String remoteMp3 = matcher.group(1);
+            String song = Utils.getProperSongDestinationName("tooxclusive",remoteMp3);
+            if(Utils.isExist(song)){
+                logger.info("Skipping the track as it already exists {}",song);
+                continue;
+            }
             try {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("172.25.30.117",6060));
                 url = new URL(remoteMp3);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection(proxy);
                 InputStream inputStream = connection.getInputStream();
                 byte[] songs = Utils.convertStreamToByteArray(inputStream);
-                String song = Utils.getProperSongDestinationName(remoteMp3);
                 Files.write(songs, new File(song));
                 logger.info("File Written:{}",song);
 
