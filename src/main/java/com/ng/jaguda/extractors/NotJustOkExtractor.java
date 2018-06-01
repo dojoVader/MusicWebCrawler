@@ -1,6 +1,7 @@
 package com.ng.jaguda.extractors;
 
 import com.google.common.io.Files;
+import com.ng.jaguda.AppConfig;
 import com.ng.jaguda.Utils;
 import com.ng.jaguda.interfaces.IPageExtractor;
 import edu.uci.ics.crawler4j.crawler.Page;
@@ -47,17 +48,28 @@ public class NotJustOkExtractor implements IPageExtractor {
                     //Get the entry for each SONG
                     JSONObject trackData = trackArrayList.getJSONObject(index);
                     String songData = trackData.getString("mp3");
-                    String song = Utils.getProperSongDestinationName("notjustok",songData);
-                    if(Utils.isExist(song)){
-                        logger.info("Skipping the track as it already exists {}",song);
+                    String song = Utils.getProperSongDestinationName("notjustok", songData);
+                    if (Utils.isExist(song)) {
+                        logger.info("Skipping the track as it already exists {}", song);
                         continue;
                     }
                     try {
-                        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("172.25.30.117", 6060));
-                        url = new URL(songData);
-                        HttpURLConnection connection = (HttpURLConnection) url.openConnection(proxy);
-                        InputStream inputStream = connection.getInputStream();
-                        byte[] songs = Utils.convertStreamToByteArray(inputStream);
+                        AppConfig config = AppConfig.getInstance();
+                        byte[] songs;
+                        if (config.isUseProxy()) {
+                            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(config.getProxyHost(), config.getProxyPort()));
+                            url = new URL(songData);
+                            HttpURLConnection connection = (HttpURLConnection) url.openConnection(proxy);
+                            InputStream inputStream = connection.getInputStream();
+                            songs = Utils.convertStreamToByteArray(inputStream);
+                        } else {
+                            url = new URL(songData);
+                            InputStream inputStream = url.openStream();
+                            songs = Utils.convertStreamToByteArray(inputStream);
+
+                        }
+
+
 
                         Files.write(songs, new File(song));
                         logger.info("File Written:{}", song);

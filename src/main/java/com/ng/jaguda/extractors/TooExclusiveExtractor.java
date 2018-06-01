@@ -1,10 +1,11 @@
 package com.ng.jaguda.extractors;
 
 import com.google.common.io.Files;
+import com.ng.jaguda.AppConfig;
 import com.ng.jaguda.Utils;
+import com.ng.jaguda.interfaces.IPageExtractor;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
-import com.ng.jaguda.interfaces.IPageExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,6 @@ public class TooExclusiveExtractor implements IPageExtractor {
     private URL url;
 
 
-
     public void handleExtraction(Page page) {
         // Instantiate our Map
 
@@ -43,19 +43,28 @@ public class TooExclusiveExtractor implements IPageExtractor {
 
         while (matcher.find()) {
             String remoteMp3 = matcher.group(1);
-            String song = Utils.getProperSongDestinationName("tooxclusive",remoteMp3);
-            if(Utils.isExist(song)){
-                logger.info("Skipping the track as it already exists {}",song);
+            String song = Utils.getProperSongDestinationName("tooxclusive", remoteMp3);
+            if (Utils.isExist(song)) {
+                logger.info("Skipping the track as it already exists {}", song);
                 continue;
             }
             try {
-                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("172.25.30.117",6060));
-                url = new URL(remoteMp3);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection(proxy);
-                InputStream inputStream = connection.getInputStream();
-                byte[] songs = Utils.convertStreamToByteArray(inputStream);
+                AppConfig config = AppConfig.getInstance();
+                byte[] songs;
+                if (config.isUseProxy()) {
+                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(config.getProxyHost(), config.getProxyPort()));
+                    url = new URL(remoteMp3);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection(proxy);
+                    InputStream inputStream = connection.getInputStream();
+                    songs = Utils.convertStreamToByteArray(inputStream);
+                } else {
+                    url = new URL(remoteMp3);
+                    InputStream inputStream = url.openStream();
+                    songs = Utils.convertStreamToByteArray(inputStream);
+
+                }
                 Files.write(songs, new File(song));
-                logger.info("File Written:{}",song);
+                logger.info("File Written:{}", song);
 
             } catch (MalformedURLException ex) {
                 logger.error("Bad Url exception: {}", ex.getMessage());

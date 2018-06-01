@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="app.storagefolder">C:\data\crawl\songs</entry>
+    <entry key="app.destination_music_folder">C:\data\mp3</entry>
+    <entry key="app.num_of_crawlers">4</entry>
+    <entry key="app.use_proxy">true</entry>
+    <entry key="app.proxy">172.25.30.117</entry>
+    <entry key="app.proxy_port">6060</entry>
+    <entry key="app.proxy_username">hudson</entry>
+    <entry key="app.proxy_password">hudson</entry>
+</properties>
